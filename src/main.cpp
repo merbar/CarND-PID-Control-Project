@@ -35,18 +35,15 @@ int main()
   PID pid_steer;
  // TODO: Initialize the pid variable.
   
-  double Kp = 0.15;
-  double Ki = 0.0001;
-  double Kd = 4.0;
+  double Kp = 0.08;
+  double Ki = 0.0004;
+  double Kd = 0.8;
   pid_steer.Init(Kp, Ki, Kd);
   
   PID pid_throttle;
   Kp = 0.9;
   Ki = 0.0;
-  Kd = 3.0;
-//  Kp = 0.8;
-//  Ki = 0.0001;
-//  Kd = 3.0;
+  Kd = 1.0;
   pid_throttle.Init(Kp, Ki, Kd);
 
   h.onMessage([&pid_steer, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -87,6 +84,7 @@ int main()
           double min_speed = 30;
           double min_throttle = 0.3;
           double max_breaking = -0.15;
+          double max_speed = 50;
           if (throttle_value < min_throttle) { 
             if (speed < min_speed)
               throttle_value = min_throttle;
@@ -94,6 +92,9 @@ int main()
               if (throttle_value < max_breaking)
                 throttle_value = max_breaking;
             }
+          }
+          if (speed > max_speed) { 
+            throttle_value = 0.0;
           }
           
           // DEBUG
