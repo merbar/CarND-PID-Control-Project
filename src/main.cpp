@@ -41,7 +41,7 @@ int main()
   pid_steer.Init(Kp, Ki, Kd);
   
   PID pid_throttle;
-  Kp = 0.9;
+  Kp = 0.8;
   Ki = 0.0;
   Kd = 1.0;
   pid_throttle.Init(Kp, Ki, Kd);
@@ -71,6 +71,22 @@ int main()
           * another PID controller to control the speed!
           */
           
+          if (speed < 38) {
+            pid_steer.Kp = 0.1;
+            pid_steer.Kd = 1;
+          } else if (speed > 50) {
+            if (speed > 70){
+              pid_steer.Kp = 0.02;
+              pid_steer.Kd = 0.2;
+            } else {
+              pid_steer.Kp = 0.04;
+              pid_steer.Kd = 0.4;
+            }
+          } else {
+            pid_steer.Kp = 0.08;
+            pid_steer.Kd = 0.8;
+          }
+          
           pid_steer.UpdateError(cte);
           steer_value = pid_steer.TotalError();
           if (steer_value > 1.0)
@@ -81,10 +97,10 @@ int main()
           // update throttle
           pid_throttle.UpdateError(cte);
           throttle_value = 1.0 - std::fabs(pid_throttle.TotalError());
-          double min_speed = 30;
+          double min_speed = 40;
           double min_throttle = 0.3;
-          double max_breaking = -0.15;
-          double max_speed = 50;
+          double max_breaking = -0.2;
+          double max_speed = 80;
           if (throttle_value < min_throttle) { 
             if (speed < min_speed)
               throttle_value = min_throttle;
