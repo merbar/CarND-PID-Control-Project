@@ -1,5 +1,48 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# PID Controller
+## Self-Driving Car Engineer Nanodegree Program
+
+Controlling steer and throttle input via PID Controllers to drive a vehicle as fast as safely possible around a track in the Udacity Simulator.  
+
+The vehicle has no knowledge about the world other than it's current deviation from center-lane (cross track error).
+
+## Result: [YouTube video: PID Control](https://youtu.be/IUm-smfyKUc)
+
+## Implementation
+
+The PID class contains the implementation of a PID Controller. Two PID Controllers are spawned to separately control steer and throttle.
+
+## Parameter / Behavior Tuning
+
+Parameters for throttle and steering PID Controllers where tweaked via trial and error.  
+
+### Steering PID
+
+My general strategy was to set the integral and derivative component to zero and find a value for `P` that would oscillate at a reasonable frequency.  
+
+I then slowly increased `D` until the car stabilized. From here, I started tweaking as described below to minimize lap time.
+
+Changes to the `P` and `D` components had the expected results
+- Increasing `P` also increased the magnitude of the oscillation
+- Increasing `D` smoothed the oscillation out. But if `D` was set too high, it destabilized the cars trajectory - especially through curves - by causing quick and extreme steering changes.
+- Adding a little bit to the `I` component helped center the vehicle significantly through long, fast turns and was key to achieving speeds above 50 mp/h. While the car does not have a steering bias, the track mostly turns left. So with `I` at zero, the vehicle tends to stay to the right of center-lane and won't allow the throttle PID to accelerate significantly.
+
+After a few runs, some relationships between the parameters stood out:
+- If `P` is too low, the vehicle won't successfully navigate the two tight turns after the bridge.
+- Oscillation could be smoothed out and the overall speed improved iteratively in two ways  
+    - Increase `D`
+    - If increasing `D` results in a less stable lap, then lower `P` and increase `I`
+
+My default parameter settings still cause some oscillation at speeds above 60 mp/h. To enable the vehicle to continue accelerating, I am lowering all parameters significantly at high speed.
+
+### Throttle PID
+
+The throttle is inversely mapped to the cross track error - a high error means the speed should be reduced, while a low error means the car is stable and should accelerate.
+
+I did not spend much time tweaking the values since I only needed the above described, fairly simple behavior.  
+
+There are a few extra checks outside of the controller:
+- Make sure the car does not stall on track by requiring a minimum speed
+- Limiting the breaking power of the vehicle to not lose too much speed unnecessarily
 
 ---
 
@@ -26,59 +69,3 @@ Self-Driving Car Engineer Nanodegree Program
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./

@@ -35,15 +35,15 @@ int main()
   PID pid_steer;
  // TODO: Initialize the pid variable.
   
-  double Kp = 0.08;
-  double Ki = 0.0004;
-  double Kd = 0.8;
+  double Kp = 0.055;
+  double Ki = 0.0024;
+  double Kd = 1.26;
   pid_steer.Init(Kp, Ki, Kd);
   
   PID pid_throttle;
-  Kp = 0.8;
+  Kp = 0.6;
   Ki = 0.0;
-  Kd = 1.0;
+  Kd = 3.0;
   pid_throttle.Init(Kp, Ki, Kd);
 
   h.onMessage([&pid_steer, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -71,20 +71,16 @@ int main()
           * another PID controller to control the speed!
           */
           
-          if (speed < 38) {
-            pid_steer.Kp = 0.1;
-            pid_steer.Kd = 1;
-          } else if (speed > 50) {
-            if (speed > 70){
-              pid_steer.Kp = 0.02;
-              pid_steer.Kd = 0.2;
-            } else {
-              pid_steer.Kp = 0.04;
-              pid_steer.Kd = 0.4;
-            }
-          } else {
-            pid_steer.Kp = 0.08;
+          // making values less sensitive at higher speeds, but only if we are not breaking
+          if ((speed > 52) & (throttle_value > 0.0)) {
+            pid_steer.Kp = 0.03;
+            pid_steer.Ki = 0.0012;
             pid_steer.Kd = 0.8;
+          } else { // have to reset to defaults once car slows down
+            pid_steer.Kp = 0.055;
+            pid_steer.Ki = 0.0024;
+            pid_steer.Ki = 0.00;
+            pid_steer.Kd = 1.26;
           }
           
           pid_steer.UpdateError(cte);
@@ -94,13 +90,18 @@ int main()
           if (steer_value < -1.0)
             steer_value = -1.0;
           
+          if (pid_steer.i_error > 25) {
+              pid_steer.i_error = 25;
+          } else if (pid_steer.i_error < -25) {
+              pid_steer.i_error = -25;
+          }
+          
           // update throttle
           pid_throttle.UpdateError(cte);
           throttle_value = 1.0 - std::fabs(pid_throttle.TotalError());
           double min_speed = 40;
           double min_throttle = 0.3;
-          double max_breaking = -0.2;
-          double max_speed = 80;
+          double max_breaking = -0.3;
           if (throttle_value < min_throttle) { 
             if (speed < min_speed)
               throttle_value = min_throttle;
@@ -109,10 +110,7 @@ int main()
                 throttle_value = max_breaking;
             }
           }
-          if (speed > max_speed) { 
-            throttle_value = 0.0;
-          }
-          
+                  
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
