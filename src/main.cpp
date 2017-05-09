@@ -84,17 +84,22 @@ int main()
           }
           
           pid_steer.UpdateError(cte);
+          
+          // addressing issues with I
+          if (pid_steer.i_error > 35) {
+              pid_steer.i_error = 35;
+          } else if (pid_steer.i_error < -35) {
+              pid_steer.i_error = -35;
+          }
+          if (cte == 0) {
+            pid_steer.i_error = 0;
+          }
+          
           steer_value = pid_steer.TotalError();
           if (steer_value > 1.0)
             steer_value = 1.0;
           if (steer_value < -1.0)
-            steer_value = -1.0;
-          
-          if (pid_steer.i_error > 25) {
-              pid_steer.i_error = 25;
-          } else if (pid_steer.i_error < -25) {
-              pid_steer.i_error = -25;
-          }
+            steer_value = -1.0;          
           
           // update throttle
           pid_throttle.UpdateError(cte);
