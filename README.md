@@ -15,7 +15,7 @@ The PID class contains the implementation of a PID Controller. Two PID Controlle
 
 Parameters for throttle and steering PID Controllers where tweaked via trial and error.  
 
-### Steering PID
+### Steering (PID)
 
 My general strategy was to set the integral and derivative component to zero and find a value for `P` that would oscillate at a reasonable frequency.  
 
@@ -34,7 +34,7 @@ After a few runs, some relationships between the parameters stood out:
 
 My default parameter settings still cause some oscillation at speeds above 60 mp/h. To enable the vehicle to continue accelerating, I am lowering all parameters significantly at high speed.
 
-### Throttle PID
+### Throttle (PD)
 
 The throttle is inversely mapped to the cross track error - a high error means the speed should be reduced, while a low error means the car is stable and should accelerate.
 
