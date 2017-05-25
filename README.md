@@ -3,7 +3,11 @@
 
 Controlling steer and throttle input via PID Controllers to drive a vehicle as fast as safely possible around a track in the Udacity Simulator.  
 
-The vehicle has no knowledge about the world other than it's current deviation from center-lane (cross track error).
+The vehicle has no knowledge about the world other than it's current deviation from center-lane (cross track error).  
+
+This is part of a series of projects exploring different methods to autonomously drive a car around the given track. Others are:
+* [MPC Control](https://github.com/merbar/CarND-MPC-Project)
+* [Deep Learning](https://github.com/merbar/CarND-Behavioral-Cloning-P3)
 
 ## Result: [YouTube video: PID Control](https://youtu.be/IUm-smfyKUc)
 
